@@ -1,0 +1,42 @@
+import sqlite3
+import pandas as pd
+
+# Load data
+df = pd.read_csv('../data/customer_support_tickets.csv')
+
+# Create an in-memory SQLite database
+conn = sqlite3.connect(':memory:')
+df.to_sql('support_tickets', conn, index=False, if_exists='replace')
+
+# Define and run queries
+queries = {
+    "Total Tickets": "SELECT COUNT(*) AS total_tickets FROM support_tickets;",
+    "Avg Response Time by Agent": (
+        "SELECT agent_id, "
+        "AVG(julianday('Time to Resolution') - julianday('First Response Time')) AS avg_days "
+        "FROM support_tickets "
+        "WHERE 'First Response Time' IS NOT NULL AND 'Time to Resolution' IS NOT NULL "
+        "GROUP BY agent_id "
+        "ORDER BY avg_days;"
+    ),
+    "Top Complaint Categories": (
+        "SELECT 'Ticket Type', COUNT(*) AS ticket_count "
+        "FROM support_tickets "
+        "GROUP BY 'Ticket Type' "
+        "ORDER BY ticket_count DESC;"
+    ),
+    "Satisfaction Rating Distribution": (
+        "SELECT 'Customer Satisfaction Rating', COUNT(*) AS count "
+        "FROM support_tickets "
+        "GROUP BY 'Customer Satisfaction Rating' "
+        "ORDER BY 'Customer Satisfaction Rating';"
+    )
+}
+
+# Execute and display results
+for title, query in queries.items():
+    print(f"\n--- {title} ---")
+    result = pd.read_sql_query(query, conn)
+    print(result)
+
+conn.close()
