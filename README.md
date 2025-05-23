@@ -1,4 +1,4 @@
-# 🧪 Customer Satisfaction Prediction
+# 👥 Customer Satisfaction Prediction
 
 This repository contains a Predicting Customer Satisfaction based on support ticket data using Python, SQL, and Machine Learning.
 
